@@ -4,8 +4,7 @@ set -euo pipefail
 PREFIX="nas-flatcar"
 CHANNEL=stable
 
-UPSTREAM_TAG=$(git ls-remote --tags --sort='-v:refname' https://github.com/flatcar/scripts.git \
-  | grep -E "$CHANNEL-[0-9.]+$" | head -n1 | sed 's#.*refs/tags/##')
+UPSTREAM_TAG=$(set +o pipefail; git ls-remote --tags --sort='-v:refname' https://github.com/flatcar/scripts.git | grep -E "$CHANNEL-[0-9.]+$" | head -n1 | sed 's#.*refs/tags/##')
 
 CONFIG_LINES="CONFIG_SCSI_TAPE=m;CONFIG_CHR_DEV_SG=m"
 CONFIG_HASH=$(echo "$CONFIG_LINES" | sha256sum | cut -c1-8)
