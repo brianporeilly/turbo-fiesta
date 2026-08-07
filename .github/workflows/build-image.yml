@@ -1,0 +1,36 @@
+name: Build custom Flatcar image
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.build.outputs.tag }}
+      skip: ${{ steps.build.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h
+
+      - name: Build
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./check_release.sh
+
+      - name: Create release
+        if: steps.build.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.build.outputs.tag }}" \
+            --title "${{ steps.build.outputs.tag }}" \
+            --notes "Flatcar ${{ steps.build.outputs.upstream }} with SCSI tape (st/sg) modules enabled." \
+            dist/*
