@@ -6,7 +6,7 @@ CHANNEL=stable
 
 UPSTREAM_TAG=$(set +o pipefail; git ls-remote --tags --sort='-v:refname' https://github.com/flatcar/scripts.git | grep -E "$CHANNEL-[0-9.]+$" | head -n1 | sed 's#.*refs/tags/##')
 
-CONFIG_LINES="CONFIG_SCSI_TAPE=m;CONFIG_CHR_DEV_SG=m"
+CONFIG_LINES="CONFIG_CHR_DEV_ST=m;CONFIG_CHR_DEV_SG=m"
 CONFIG_HASH=$(echo "$CONFIG_LINES" | sha256sum | cut -c1-8)
 TAG="${PREFIX}-${UPSTREAM_TAG}-${CONFIG_HASH}"
 
@@ -23,7 +23,7 @@ cd scripts
 ./run_sdk_container ./build_packages --board=amd64-usr
 
 DEFCONFIG=$(ls sdk_container/src/third_party/coreos-overlay/sys-kernel/coreos-modules/files/amd64_defconfig-* | head -n1)
-for line in "CONFIG_SCSI_TAPE=m" "CONFIG_CHR_DEV_SG=m"; do
+for line in "CONFIG_CHR_DEV_ST=m" "CONFIG_CHR_DEV_SG=m"; do
   grep -qxF "$line" "$DEFCONFIG" || echo "$line" >> "$DEFCONFIG"
 done
 
