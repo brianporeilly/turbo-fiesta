@@ -48,7 +48,23 @@ fi
 cd ..
 
 source scripts/sdk_container/.repo/manifests/version.txt
-BUILD_DIR=$(ls -d build/images/amd64-usr/*"${FLATCAR_VERSION}"*/ 2>/dev/null | head -n1)
+
+shopt -s nullglob
+MATCHES=(build/images/amd64-usr/*"${FLATCAR_VERSION}"*/)
+shopt -u nullglob
+
+if [[ ${#MATCHES[@]} -eq 0 ]]; then
+  echo "No build output directory found matching version '${FLATCAR_VERSION}'" >&2
+  echo "Contents of build/images/amd64-usr/:" >&2
+  ls -la build/images/amd64-usr/ >&2 || echo "(directory doesn't exist either)" >&2
+  exit 1
+elif [[ ${#MATCHES[@]} -gt 1 ]]; then
+  echo "Multiple build output directories matched — ambiguous:" >&2
+  printf '%s\n' "${MATCHES[@]}" >&2
+  exit 1
+fi
+
+BUILD_DIR="${MATCHES[0]}"
 echo "Found build output: $BUILD_DIR"
 ls -la "$BUILD_DIR"
 
