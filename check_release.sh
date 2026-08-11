@@ -3,6 +3,7 @@ set -euo pipefail
 
 PREFIX="nas-flatcar"
 CHANNEL=stable
+CONTAINER_NAME="nas-flatcar-build"
 
 UPSTREAM_TAG=$(set +o pipefail; git ls-remote --tags --sort='-v:refname' https://github.com/flatcar/scripts.git | grep -E "$CHANNEL-[0-9.]+$" | head -n1 | sed 's#.*refs/tags/##')
 
@@ -19,19 +20,24 @@ fi
 echo "Building $TAG (upstream $UPSTREAM_TAG)"
 git clone --branch "$UPSTREAM_TAG" --depth 1 https://github.com/flatcar/scripts.git
 cd scripts
-   git config user.email "ci@example.com"
-   git config user.name "NAS Flatcar CI"
-   git add sdk_container/src/third_party/coreos-overlay/sys-kernel/coreos-modules/files/
-   git commit -m "Enable CHR_DEV_ST and CHR_DEV_SG"
 
-./run_sdk_container ./build_packages --board=amd64-usr
+./run_sdk_container -n "$CONTAINER_NAME" ./build_packages --board=amd64-usr
 
 DEFCONFIG=$(ls sdk_container/src/third_party/coreos-overlay/sys-kernel/coreos-modules/files/amd64_defconfig-* | head -n1)
 for line in "CONFIG_CHR_DEV_ST=m" "CONFIG_CHR_DEV_SG=m"; do
   grep -qxF "$line" "$DEFCONFIG" || echo "$line" >> "$DEFCONFIG"
 done
 
-./run_sdk_container bash -c '
+git config user.email "ci@example.com"
+git config user.name "NAS Flatcar CI"
+git add "$DEFCONFIG"
+if ! git diff --cached --quiet; then
+  git commit -m "Enable CHR_DEV_ST and CHR_DEV_SG"
+else
+  echo "Defconfig already contains desired lines, nothing to commit"
+fi
+
+./run_sdk_container -n "$CONTAINER_NAME" bash -c '
   set -e
   rm -f /build/amd64-usr/var/tmp/portage/sys-kernel/coreos-modules-*/.compiled 2>/dev/null || true
   emerge-amd64-usr sys-kernel/coreos-modules
