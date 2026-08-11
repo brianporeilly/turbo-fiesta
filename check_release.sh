@@ -19,6 +19,10 @@ fi
 echo "Building $TAG (upstream $UPSTREAM_TAG)"
 git clone --branch "$UPSTREAM_TAG" --depth 1 https://github.com/flatcar/scripts.git
 cd scripts
+   git config user.email "ci@example.com"
+   git config user.name "NAS Flatcar CI"
+   git add sdk_container/src/third_party/coreos-overlay/sys-kernel/coreos-modules/files/
+   git commit -m "Enable CHR_DEV_ST and CHR_DEV_SG"
 
 ./run_sdk_container ./build_packages --board=amd64-usr
 
@@ -37,17 +41,18 @@ done
 
 cd ..
 
-BUILD_DIR="build/images/amd64-usr/latest"
-echo "Build output directory contents:"
+source scripts/sdk_container/.repo/manifests/version.txt
+BUILD_DIR=$(ls -d build/images/amd64-usr/*"${FLATCAR_VERSION}"*/ 2>/dev/null | head -n1)
+echo "Found build output: $BUILD_DIR"
 ls -la "$BUILD_DIR"
 
 mkdir -p dist
 for f in flatcar_production_update.gz flatcar_production_pxe.vmlinuz flatcar_production_pxe_image.cpio.gz; do
-  if [[ ! -f "$BUILD_DIR/$f" ]]; then
-    echo "Expected artifact missing: $BUILD_DIR/$f" >&2
+  if [[ ! -f "${BUILD_DIR}${f}" ]]; then
+    echo "Expected artifact missing: ${BUILD_DIR}${f}" >&2
     exit 1
   fi
-  cp "$BUILD_DIR/$f" dist/
+  cp "${BUILD_DIR}${f}" dist/
 done
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
