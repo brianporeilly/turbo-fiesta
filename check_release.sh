@@ -108,6 +108,9 @@ fi
 
 # Only copy this in after the expensive step, so there's no chance of it
 # affecting whatever build_packages uses to detect a changed working tree.
+# See ci_build_steps.sh (kept as a separate file, not inlined here, since
+# an inlined multi-line `bash -c` string previously broke in transit
+# through run_sdk_container for reasons we never fully pinned down).
 cp ../ci_build_steps.sh .
 chmod +x ci_build_steps.sh
 
