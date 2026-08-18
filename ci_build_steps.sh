@@ -69,6 +69,15 @@ for f in flatcar_production_update.bin flatcar_production_pxe.vmlinuz flatcar_pr
   fi
 done
 
+# Companion sha256 for the update payload -- lets a lightweight checker job
+# (e.g. a GHA-triggered Nebraska package registration) get the hash without
+# ever downloading the multi-hundred-MB payload itself.
+if [[ -f dist/flatcar_production_update.bin ]]; then
+  ( cd dist && sha256sum flatcar_production_update.bin > flatcar_production_update.bin.sha256 )
+  echo "Wrote checksum:"
+  cat dist/flatcar_production_update.bin.sha256
+fi
+
 if [[ ${#MISSING[@]} -gt 0 ]]; then
   echo "Missing artifacts: ${MISSING[*]}" >&2
   echo "(see the directory listing above for what was actually produced)" >&2
