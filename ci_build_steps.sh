@@ -59,7 +59,7 @@ MISSING=()
 # are the direct kernel/initrd pair for iPXE. flatcar_production_pxe_grub.efi
 # is an alternative GRUB-chainload path -- not required for a direct
 # kernel+initrd iPXE menu entry, but cheap to keep around for flexibility.
-for f in flatcar_production_update.bin flatcar_production_pxe.vmlinuz flatcar_production_pxe_image.cpio.gz flatcar_production_pxe_grub.efi; do
+for f in flatcar_production_update.bin flatcar_production_update.bin.bz2 flatcar_production_pxe.vmlinuz flatcar_production_pxe_image.cpio.gz flatcar_production_pxe_grub.efi; do
   if [[ -f "${BUILD_OUT}${f}" ]]; then
     cp "${BUILD_OUT}${f}" dist/
     echo "Collected: $f"
@@ -76,6 +76,11 @@ if [[ -f dist/flatcar_production_update.bin ]]; then
   ( cd dist && sha256sum flatcar_production_update.bin > flatcar_production_update.bin.sha256 )
   echo "Wrote checksum:"
   cat dist/flatcar_production_update.bin.sha256
+fi
+if [[ -f dist/flatcar_production_update.bin.bz2 ]]; then
+  ( cd dist && sha256sum flatcar_production_update.bin.bz2 > flatcar_production_update.bin.bz2.sha256 )
+  echo "Wrote checksum:"
+  cat dist/flatcar_production_update.bin.bz2.sha256
 fi
 
 if [[ ${#MISSING[@]} -gt 0 ]]; then
