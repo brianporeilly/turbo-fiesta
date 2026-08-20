@@ -123,7 +123,7 @@ mv scripts/dist ./dist
 echo "Collected artifacts:"
 ls -la dist/
 
-for f in flatcar_production_update.bin flatcar_production_pxe.vmlinuz flatcar_production_pxe_image.cpio.gz; do
+for f in flatcar_test_update.gz flatcar_production_update.bin.bz2 flatcar_production_pxe.vmlinuz flatcar_production_pxe_image.cpio.gz; do
   if [[ ! -f "dist/$f" ]]; then
     echo "Artifact missing after copy-out: dist/$f" >&2
     exit 1
