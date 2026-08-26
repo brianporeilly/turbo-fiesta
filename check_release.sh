@@ -94,13 +94,6 @@ for line in "CONFIG_CHR_DEV_ST=m" "CONFIG_CHR_DEV_SG=m"; do
   grep -qxF "$line" "$DEFCONFIG" || echo "$line" >> "$DEFCONFIG"
 done
 
-git_cmd add "$DEFCONFIG"
-if ! git_cmd diff --cached --quiet; then
-  git_cmd -c user.email="ci@example.com" -c user.name="NAS Flatcar CI" commit -m "Enable CHR_DEV_ST and CHR_DEV_SG"
-else
-  echo "Defconfig already contains desired lines, nothing to commit"
-fi
-
 # --- 5. Build. Same container name for both calls so the second call ---
 # ---    reuses the package cache the first call just built.          ---
 
