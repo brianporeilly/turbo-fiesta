@@ -46,6 +46,8 @@ if [[ -z "$UPSTREAM_TAG" ]]; then
   exit 1
 fi
 
+BARE_VERSION="${UPSTREAM_TAG#${CHANNEL}-}"
+
 # Fingerprint the config change itself, so editing it later produces a new
 # tag even if upstream's version hasn't moved.
 CONFIG_LINES="CONFIG_CHR_DEV_ST=m;CONFIG_CHR_DEV_SG=m"
@@ -93,6 +95,22 @@ DEFCONFIG=$(ls sdk_container/src/third_party/coreos-overlay/sys-kernel/coreos-mo
 for line in "CONFIG_CHR_DEV_ST=m" "CONFIG_CHR_DEV_SG=m"; do
   grep -qxF "$line" "$DEFCONFIG" || echo "$line" >> "$DEFCONFIG"
 done
+
+# commit and tag so the version string is clean
+git_cmd add "$DEFCONFIG"
+if ! git_cmd diff --cached --quiet; then
+  git_cmd -c user.email="ci@bricriu.dev" -c user.name="NAS Flatcar CI" commit -m "Enable CHR_DEV_ST and CHR_DEV_SG"
+else
+  echo "Defconfig already contains desired lines, nothing to commit"
+fi
+
+# Re-tag locally at the bare upstream version and check that out, so the
+# SDK's version-detection sees "HEAD exactly at a known tag" rather than
+# "N commits ahead" -- this is what gets FLATCAR_VERSION to come out clean
+# instead of picking up a +N-ghash or +timestamp suffix.
+BARE_VERSION="${UPSTREAM_TAG#${CHANNEL}-}"
+git_cmd tag -f "$BARE_VERSION"
+git_cmd checkout "$BARE_VERSION"
 
 # --- 5. Build. Same container name for both calls so the second call ---
 # ---    reuses the package cache the first call just built.          ---
