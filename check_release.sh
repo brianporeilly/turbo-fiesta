@@ -115,7 +115,7 @@ git_cmd checkout "$BARE_VERSION"
 # --- 5. Build. Same container name for both calls so the second call ---
 # ---    reuses the package cache the first call just built.          ---
 
-./run_sdk_container -n "$CONTAINER_NAME" ./build_packages --board=amd64-usr
+./run_sdk_container -n "$CONTAINER_NAME" bash -c "COREOS_OFFICIAL=1 ./build_packages --board=amd64-usr"
 
 # Only copy this in after the expensive step, so there's no chance of it
 # affecting whatever build_packages uses to detect a changed working tree.
