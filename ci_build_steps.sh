@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-export COREOS_OFFICIAL=1
-
 rm -f /build/amd64-usr/var/tmp/portage/sys-kernel/coreos-modules-*/.compiled 2>/dev/null || true
 emerge-amd64-usr sys-kernel/coreos-modules
 emerge-amd64-usr sys-kernel/coreos-kernel

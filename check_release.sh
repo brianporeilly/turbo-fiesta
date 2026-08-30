@@ -91,6 +91,8 @@ fi
 
 # --- 4. Apply the config change ---
 
+sed -i 's/\${COREOS_OFFICIAL:-0} -ne 1 && -n "\${FLATCAR_BUILD_ID}"/0 -eq 1/' common.sh
+
 DEFCONFIG=$(ls sdk_container/src/third_party/coreos-overlay/sys-kernel/coreos-modules/files/amd64_defconfig-* | head -n1)
 for line in "CONFIG_CHR_DEV_ST=m" "CONFIG_CHR_DEV_SG=m"; do
   grep -qxF "$line" "$DEFCONFIG" || echo "$line" >> "$DEFCONFIG"
@@ -115,7 +117,7 @@ git_cmd checkout "$BARE_VERSION"
 # --- 5. Build. Same container name for both calls so the second call ---
 # ---    reuses the package cache the first call just built.          ---
 
-./run_sdk_container -n "$CONTAINER_NAME" bash -c "COREOS_OFFICIAL=1 ./build_packages --board=amd64-usr"
+./run_sdk_container -n "$CONTAINER_NAME" bash -c "./build_packages --board=amd64-usr"
 
 # Only copy this in after the expensive step, so there's no chance of it
 # affecting whatever build_packages uses to detect a changed working tree.
