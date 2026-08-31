@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+sed -i 's/^FLATCAR_BUILD_ID=.*/FLATCAR_BUILD_ID="local"/' /mnt/host/source/.repo/manifests/version.txt
+
 rm -f /build/amd64-usr/var/tmp/portage/sys-kernel/coreos-modules-*/.compiled 2>/dev/null || true
 emerge-amd64-usr sys-kernel/coreos-modules
 emerge-amd64-usr sys-kernel/coreos-kernel
