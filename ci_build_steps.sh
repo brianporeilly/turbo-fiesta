@@ -81,6 +81,12 @@ if [[ -f dist/flatcar_test_update.gz ]]; then
   echo "Wrote checksum:"
   cat dist/flatcar_test_update.gz.sha256
 fi
+if [[ -f dist/flatcar_test_update.gz ]]; then
+  openssl dgst -sha1 -binary < dist/flatcar_test_update.gz | base64 > dist/flatcar_test_update.gz.sha1.b64
+  openssl dgst -sha256 -binary < dist/flatcar_test_update.gz | base64 > dist/flatcar_test_update.gz.sha256.b64
+  echo "sha1:   $(cat dist/flatcar_test_update.gz.sha1.b64)"
+  echo "sha256: $(cat dist/flatcar_test_update.gz.sha256.b64)"
+fi
 
 if [[ ${#MISSING[@]} -gt 0 ]]; then
   echo "Missing artifacts: ${MISSING[*]}" >&2
